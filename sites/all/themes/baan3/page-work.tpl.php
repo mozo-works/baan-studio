@@ -68,25 +68,18 @@
           <?php $title = $node->title; ?>
           <?php if ($title): print '<h2'. ($tabs ? ' class="with-tabs"' : '') .'>'. $title .'</h2>'; endif; ?>
           <?php
-/*             print_r(array_keys($node->content['group_header']['group'])); */
-            
             print $node->content['group_header']['#children'];
-/*
-            $test = $node->content['group_header'];
-            $test['#printed'] = NULL;
-            var_dump($test['#printed']);
-*/
           ?>
         </div>
         <div class="nav-next">
           <?php
-            $block = module_invoke('prev_next', 'block', 'view', '0');
+            $block = module_invoke('nodequeue_prev_next', 'block', 'view', '2');
             print $block['content'];
           ?>
         </div>
         <div class="nav-prev">
           <?php
-            $block = module_invoke('prev_next', 'block', 'view', '1');
+            $block = module_invoke('nodequeue_prev_next', 'block', 'view', '1');
             print $block['content'];
           ?>
         </div>
