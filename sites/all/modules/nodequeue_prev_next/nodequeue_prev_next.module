@@ -36,13 +36,23 @@ function nodequeue_prev_next_block($op = 'list', $delta = 0, $edit = array()) {
 				if (!empty($pos)) {
 					if ($delta % 2 == 0) {
 						$order = 'Next';
-						$node_next = nodequeue_load_nodes($sqid, FALSE, $pos - 1, 1);
+						if ($node->type == 'project') {
+							$from = $pos - 1;
+						} else {
+							$from = $pos;
+						}
+						$node_next = nodequeue_load_nodes($sqid, FALSE, $from, 1);
 						if (!empty($node_next[0]->nid)) {
 							$content .= '<li>←<br />' . l($node_next[0]->title, 'node/'.$node_next[0]->nid) . '</li>';
 						}
 					} else {
 						$order = 'Prev';
-						$node_prev = nodequeue_load_nodes($sqid, FALSE, $pos - 3, 1);
+						if ($node->type == 'project') {
+							$from = $pos - 3;
+						} else {
+							$from = $pos - 2;
+						}
+						$node_prev = nodequeue_load_nodes($sqid, FALSE, $from, 1);
 						if (!empty($node_prev[0]->nid)) {
 							$content .= '<li>→<br />' . l($node_prev[0]->title, 'node/'.$node_prev[0]->nid) . '</li>';
 						}
@@ -50,13 +60,10 @@ function nodequeue_prev_next_block($op = 'list', $delta = 0, $edit = array()) {
 				}
 			}
 
-			$block = array(
+			return $block = array(
 			  'subject' => '',
 			  'content' => '<ul class="prev-next-links">' . $content . '</ul>'
 			);
-			if ($content) {
-				return $block;
-			}
 		break;
 	}
 }
