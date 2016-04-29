@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Provide prev/next blocks for navigation using nodequeue.
+ */
+
+/**
+ * Implementation of hook_block().
+ */
+function nodequeue_prev_next_block($op = 'list', $delta = 0, $edit = array()) {
+	switch ($op) {
+		case 'list':
+			for ($i=1; $i < 5; $i++) {
+				$order = ($i % 2 == 0) ? 'Next' : 'Prev';
+				$blocks[$i] = array(
+					'info'    => t('!order links !blocknum', array('!order' => $order, '!blocknum' => $i)),
+					'status'  => 0,
+					'cache'   => BLOCK_CACHE_PER_PAGE
+				);
+			}
+			return $blocks;
+		break;
+		case 'view':
+			$content = '';
+			$order = '';
+			$node = menu_get_object();
+			if (!empty($node) && in_array($node->type, array('project', 'work'))) {
+				$subqueues = array(
+					'project' => 1,
+					'work' => 2
+				);
+				$sqid = $subqueues[$node->type];
+				$pos = (int) nodequeue_get_subqueue_position($sqid, $node->nid);
+
+				if (!empty($pos)) {
+					if ($delta % 2 == 0) {
+						$order = 'Next';
+						$node_next = nodequeue_load_nodes($sqid, FALSE, $pos - 1, 1);
+						if (!empty($node_next[0]->nid)) {
+							$content .= '<li>←<br />' . l($node_next[0]->title, 'node/'.$node_next[0]->nid) . '</li>';
+						}
+					} else {
+						$order = 'Prev';
+						$node_prev = nodequeue_load_nodes($sqid, FALSE, $pos - 3, 1);
+						if (!empty($node_prev[0]->nid)) {
+							$content .= '<li>→<br />' . l($node_prev[0]->title, 'node/'.$node_prev[0]->nid) . '</li>';
+						}
+					}
+				}
+			}
+
+			$block = array(
+			  'subject' => '',
+			  'content' => '<ul class="prev-next-links">' . $content . '</ul>'
+			);
+			if ($content) {
+				return $block;
+			}
+		break;
+	}
+}

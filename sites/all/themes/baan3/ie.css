@@ -1,0 +1,32 @@
+@charset "utf-8";
+/* $Id: ie.css,v 1.2 2009/07/13 23:52:58 andregriffin Exp $ */
+/**
+ * Drupal 6 Framework - Created by Andre Griffin
+ * For Internet Explorer 7 and under
+ */
+
+ol{list-style-position:inside;margin-left:-1.3em;}
+ol ul li{margin-left:1.5em;padding:0;}
+.clearfix,.container{display:inline-block;}
+* html .clearfix,* html .container{height:1%;}
+
+.admin #header { position: relative; top: -35px; margin-bottom: -35px;}
+
+.bottom-rule {
+	height:1px; border-top: 1px solid #000; position: absolute; margin-top:-25px; z-index: -100;
+}
+
+#footer { margin-top: 20px; }
+.medias #footer { margin-top: 40px; }
+
+/* caption on hover */
+a.cap-overlay:hover:before { content:attr(title); position:absolute; display:block; width: 129px; height:178px; background: #000; color: #fff; font-size: 12pt; line-height: 1; padding: 10px; z-index: 100; text-decoration: none;}
+
+/* caption on hover */
+/* a.cap-overlay:hover:before { display:block; background-color: black; content:attr(title) "-test" !important; z-index: 1000;} */
+
+#content-footer { clear:both; float:none; overflow: hidden; }
+
+#block-prev_next-2, #block-block-2, #block-prev_next-3 { width: 120px; height: 82px; float: left; }
+#block-prev_next-2, #block-prev_next-3 { padding: 0 10px; }
+#block-block-2 { width: 630px; margin-left: 30px;}

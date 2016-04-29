@@ -1,0 +1,5 @@
+name = "Nodequeue Prev/Next Blocks"
+description = "Provide prev/next blocks for navigation using nodequeue."
+core = 6.x
+package = Nodequeue
+dependencies[] = nodequeue
