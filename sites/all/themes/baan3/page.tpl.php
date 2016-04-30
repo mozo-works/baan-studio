@@ -8,6 +8,15 @@
     <?php print $head ?>
 	  <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 	  <meta name="keywords" content="김성렬, 김성열, 반, 반스튜디오, 반그래픽스, Sungyeol Kim, Baan, Baanstudio, Baangraphics" />
+    <script src="//ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js"></script>
+    <script>
+      WebFont.load({
+        custom: {
+          families: ['Noto Sans KR'],
+          urls: ['/sites/all/themes/baan3/font.css']
+        }
+      });
+    </script>
     <?php print $styles ?>
     <?php print $scripts ?>
     <!--[if lte IE 7]><?php print baan3_get_ie_styles(); ?><![endif]--> <!--If Less Than or Equal (lte) to IE 7-->

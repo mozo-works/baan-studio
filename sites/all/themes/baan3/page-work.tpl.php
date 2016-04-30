@@ -7,6 +7,15 @@
     <title><?php print $node->title; ?> | BAAN</title>
     <?php print $head ?>
 	  <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+    <script src="//ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js"></script>
+    <script>
+      WebFont.load({
+        custom: {
+          families: ['Noto Sans KR'],
+          urls: ['/sites/all/themes/baan3/font.css']
+        }
+      });
+    </script>
     <?php print $styles ?>
     <?php print $scripts ?>
     <meta name="title" content="<?php print $node->title; ?> | BAAN" />
