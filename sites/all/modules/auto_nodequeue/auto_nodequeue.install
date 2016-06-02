@@ -1,0 +1,28 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Install, uninstall and update functions
+ */
+
+/**
+ * Add the auto_add flag to the nodequeue_queue table
+ */
+function auto_nodequeue_install() {
+  $sql = <<<SQL
+    CREATE TABLE {nodequeue_auto} (
+      qid INT UNSIGNED NOT NULL DEFAULT 0,
+      auto_add INT UNSIGNED NOT NULL DEFAULT 0,
+      PRIMARY KEY qid(qid)
+    )
+SQL;
+
+  db_query($sql);
+}
+
+/**
+ * Remove the auto_add flag from the nodequeue_queue table
+ */
+function auto_nodequeue_uninstall() {
+  db_query('DROP TABLE {nodequeue_auto}');
+}

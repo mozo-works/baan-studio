@@ -1,0 +1,10 @@
+name = Auto Nodequeue
+description = Allows automatic addition of nodes to a queue
+package = Nodequeue
+core = 6.x
+; Information added by drupal.org packaging script on 2012-01-23
+version = "6.x-1.0-rc1"
+core = "6.x"
+project = "auto_nodequeue"
+datestamp = "1327299637"
+
