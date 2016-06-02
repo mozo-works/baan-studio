@@ -63,6 +63,7 @@ class views_plugin_style_rss extends views_plugin_style {
       '#description' => t('This will appear in the RSS feed itself.'),
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-style-options-override' => array(FALSE)),
+      '#maxlength' => 1024,
     );
   }
 
@@ -74,6 +75,21 @@ class views_plugin_style_rss extends views_plugin_style {
    */
   function get_channel_elements() {
     return array();
+  }
+
+  /**
+   * Get RSS feed description.
+   *
+   * @return string
+   *   The string containing the description with the tokens replaced.
+   */
+  function get_description() {
+    $description = $this->options['description'];
+
+    // Allow substitutions from the first row.
+    $description = $this->tokenize_value($description, 0);
+
+    return $description;
   }
 
   function render() {

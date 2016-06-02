@@ -3,6 +3,8 @@
 /**
  * Handles relationships for content translation sets and provides multiple
  * options.
+ *
+ * @ingroup views_relationship_handlers
  */
 class views_handler_relationship_translation extends views_handler_relationship {
   function option_definition() {
@@ -77,7 +79,7 @@ class views_handler_relationship_translation extends views_handler_relationship 
       }
     }
 
-    if (!empty($def['join_handler']) && class_exists($def['join_handler'])) {
+    if (!empty($def['join_handler']) && class_exists($def['join_handler'], FALSE)) {
       $join = new $def['join_handler'];
     }
     else {

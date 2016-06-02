@@ -26,6 +26,53 @@ class view extends views_db_object {
    */
   var $vid;
 
+  /**
+   * The description of the view, which is used only in the interface.
+   *
+   * @var string
+   */
+  var $description;
+
+  /**
+   * The "tags" of a view.
+   * The tags are stored as a single string, though it is used as multiple tags
+   * for example in the views overview.
+   *
+   * @var string
+   */
+  var $tag;
+
+  /**
+   * The human readable name of the view.
+   *
+   * @var string
+   */
+  var $human_name;
+
+  /**
+   * The core version the view was created for.
+   * @var int
+   */
+  var $core;
+
+  /**
+   * The views-api version this view was created by.
+   *
+   * Some examples of the variable are 3.0 or 3.0-alpha1
+   *
+   * @var string
+   */
+  var $api_version;
+
+  /**
+   * Is the view disabled.
+   *
+   * This value is used for exported view, to provide some default views which aren't enabled.
+   *
+   * @var bool
+   */
+  var $disabled;
+
   // State variables
   var $built = FALSE;
   var $executed = FALSE;
@@ -88,7 +135,22 @@ class view extends views_db_object {
    *
    * @var views_plugin_style
    */
-   var $style_plugin;
+  var $style_plugin;
+
+  /**
+   * Stored the changed options of the style plugin.
+   *
+   * @deprecated Better use $view->style_plugin->options
+   * @var array
+   */
+  var $style_options;
+
+  /**
+   * Stores the current active row while rendering.
+   *
+   * @var int
+   */
+  var $row_index;
 
   /**
    * Allow to override the path used for generated urls.
@@ -101,6 +163,58 @@ class view extends views_db_object {
    * Stores all the views substitutions.
    */
   var $substitutions = array();
+
+  /**
+   * Here comes a list of the possible handler which are active on this view.
+   */
+
+  /**
+   * Stores the field handlers which are initialized on this view.
+   * @var array[views_handler_field]
+   */
+  var $field;
+
+  /**
+   * Stores the argument handlers which are initialized on this view.
+   * @var array[views_handler_argument]
+   */
+  var $argument;
+
+  /**
+   * Stores the sort handlers which are initialized on this view.
+   * @var array[views_handler_sort]
+   */
+  var $sort;
+
+  /**
+   * Stores the filter handlers which are initialized on this view.
+   * @var array[views_handler_filter]
+   */
+  var $filter;
+
+  /**
+   * Stores the relationship handlers which are initialized on this view.
+   * @var array[views_handler_relationship]
+   */
+  var $relationship;
+
+  /**
+   * Stores the area handlers for the header which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $header;
+
+  /**
+   * Stores the area handlers for the footer which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $footer;
+
+  /**
+   * Stores the area handlers for the empty text which are initialized on this view.
+   * @var array[views_handler_area]
+   */
+  var $empty;
 
   /**
    * Constructor
@@ -783,6 +897,10 @@ class view extends views_db_object {
 
   /**
    * Internal method to build an individual set of handlers.
+   *
+   * @param string $key
+   *    The type of handlers (filter etc.) which should be iterated over to
+   *    build the relationship and query information.
    */
   function _build($key) {
     $handlers = &$this->$key;
@@ -804,6 +922,13 @@ class view extends views_db_object {
 
   /**
    * Execute the view's query.
+   *
+   * @param string $display_id
+   *   The machine name of the display, which should be executed.
+   *
+   * @return bool
+   *   Return whether the executing was successful, for example an argument
+   *   could stop the process.
    */
   function execute($display_id = NULL) {
     if (empty($this->built)) {
@@ -859,7 +984,16 @@ class view extends views_db_object {
   }
 
   /**
-   * Render this view for display.
+   * Render this view for a certain display.
+   *
+   * Note: You should better use just the preview function if you want to
+   * render a view.
+   *
+   * @param string $display_id
+   *   The machine name of the display, which should be rendered.
+   *
+   * @return (string|NULL)
+   *   Return the output of the rendered view or NULL if something failed in the process.
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
@@ -892,6 +1026,11 @@ class view extends views_db_object {
     else {
       if ($cache) {
         $cache->cache_start();
+      }
+
+      // Run pre_render for the pager as it might change the result.
+      if (!empty($this->query->pager)) {
+        $this->query->pager->pre_render($this->result);
       }
 
       // Initialize the style plugin.
@@ -954,7 +1093,19 @@ class view extends views_db_object {
   }
 
   /**
-   * Render a specific field via the field ID and the row #.
+   * Render a specific field via the field ID and the row #
+   *
+   * Note: You might want to use views_plugin_style::render_fields as it
+   * caches the output for you.
+   *
+   * @param string $field
+   *   The id of the field to be rendered.
+   *
+   * @param int $row
+   *   The row number in the $view->result which is used for the rendering.
+   *
+   * @return string
+   *   The rendered output of the field.
    */
   function render_field($field, $row) {
     if (isset($this->field[$field]) && isset($this->result[$row])) {
@@ -1036,19 +1187,17 @@ class view extends views_db_object {
     views_set_current_view($this);
     $display_id = $this->current_display;
 
-    // Let modules modify the view just prior to executing it.
-    foreach (module_implements('views_pre_view') as $module) {
-      $function = $module . '_views_pre_view';
-      $function($this, $display_id, $args);
-    }
-
     // Prepare the view with the information we have, but only if we were
     // passed arguments, as they may have been set previously.
     if ($args) {
       $this->set_arguments($args);
     }
 
-//    $this->attach_displays();
+    // Let modules modify the view just prior to executing it.
+    foreach (module_implements('views_pre_view') as $module) {
+      $function = $module . '_views_pre_view';
+      $function($this, $display_id, $this->args);
+    }
 
     // Allow the display handler to set up for execution
     $this->display_handler->pre_execute();
@@ -1325,7 +1474,7 @@ class view extends views_db_object {
           $title = t('Home');
         }
         if ($title) {
-          $breadcrumb[] = l($title, $path, array('html' => true));
+          $breadcrumb[] = l($title, $path, array('html' => TRUE));
         }
       }
 
@@ -2215,6 +2364,20 @@ class views_db_object {
  * to the behavior of the display at all.
  */
 class views_display extends views_db_object {
+  /**
+   * The display handler itself, which has all the methods.
+   *
+   * @var views_plugin_display
+   */
+  var $handler;
+
+  /**
+   * Stores all options of the display, like fields, filters etc.
+   *
+   * @var array
+   */
+  var $display_options;
+
   var $db_table = 'views_display';
   function views_display($init = TRUE) {
     parent::init($init);

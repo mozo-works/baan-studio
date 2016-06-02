@@ -22,6 +22,15 @@ class views_plugin_style extends views_plugin {
    * Store all availible tokens row rows.
    */
   var $row_tokens = array();
+
+  /**
+   * Contains the row plugin, if it's initialized
+   * and the style itself supports it.
+   *
+   * @var views_plugin_row
+   */
+  var $row_plugin;
+
   /**
    * Initialize a style plugin.
    *
@@ -297,6 +306,7 @@ class views_plugin_style extends views_plugin {
     }
 
     if (!isset($this->rendered_fields)) {
+      $this->rendered_fields = array();
       $this->view->row_index = 0;
       $keys = array_keys($this->view->field);
 

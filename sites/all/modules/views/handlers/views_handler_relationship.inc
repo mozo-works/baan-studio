@@ -118,7 +118,11 @@ class views_handler_relationship extends views_handler {
       $def['type'] = 'INNER';
     }
 
-    if (!empty($def['join_handler']) && class_exists($def['join_handler'])) {
+    if (!empty($this->definition['extra'])) {
+      $def['extra'] = $this->definition['extra'];
+    }
+
+    if (!empty($def['join_handler']) && class_exists($def['join_handler'], FALSE)) {
       $join = new $def['join_handler'];
     }
     else {
@@ -146,6 +150,8 @@ class views_handler_relationship extends views_handler {
 
 /**
  * A special handler to take the place of missing or broken handlers.
+ *
+ * @ingroup views_relationship_handlers
  */
 class views_handler_relationship_broken extends views_handler_relationship {
   function ui_name($short = FALSE) {

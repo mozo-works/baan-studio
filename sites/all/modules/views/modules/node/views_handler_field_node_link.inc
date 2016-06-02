@@ -1,6 +1,8 @@
 <?php
 /**
  * Field handler to present a link to the node.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_node_link extends views_handler_field {
   function construct() {
@@ -23,6 +25,10 @@ class views_handler_field_node_link extends views_handler_field {
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
     );
+
+    // The path is set by render_link function so don't allow to set it.
+    $form['alter']['path'] = array('#access' => FALSE);
+    $form['alter']['external'] = array('#access' => FALSE);
   }
 
   function query() {

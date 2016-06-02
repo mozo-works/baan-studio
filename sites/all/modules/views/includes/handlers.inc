@@ -14,12 +14,12 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   }
 
   if (!empty($definition['override handler']) &&
-      !class_exists($definition['override handler']) &&
+      !class_exists($definition['override handler'], FALSE) &&
       !views_include_handler($definition['override handler'], $definition, $type)) {
     return;
   }
 
-  if (!class_exists($definition['handler']) &&
+  if (!class_exists($definition['handler'], FALSE) &&
       !views_include_handler($definition['handler'], $definition, $type)) {
     return;
   }
@@ -55,7 +55,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
  */
 function views_include_handler($handler, $definition, $type, $count = 0) {
   // Do not proceed if the class already exists.
-  if (isset($handler) && class_exists($handler)) {
+  if (isset($handler) && class_exists($handler, FALSE)) {
     return TRUE;
   }
 
@@ -99,7 +99,7 @@ function views_include_handler($handler, $definition, $type, $count = 0) {
     }
   }
 
-  return class_exists($handler);
+  return class_exists($handler, FALSE);
 }
 
 /**
@@ -125,9 +125,9 @@ function _views_prepare_handler($definition, $data, $field, $type) {
 /**
  * Fetch the handler data from cache.
  */
-function views_fetch_handler_data($handler = NULL) {
+function views_fetch_handler_data($handler = NULL, $reset = NULL) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $start = views_microtime();
 
     $cache = views_discover_handlers();
@@ -191,7 +191,7 @@ function views_get_table_join($table, $base_table) {
   $data = views_fetch_data($table);
   if (isset($data['table']['join'][$base_table])) {
     $h = $data['table']['join'][$base_table];
-    if (!empty($h['handler']) && class_exists($h['handler'])) {
+    if (!empty($h['handler']) && class_exists($h['handler'], FALSE)) {
       $handler = new $h['handler'];
     }
     else {
@@ -1572,6 +1572,7 @@ function views_views_handlers() {
  *   - - operator: defaults to =
  *   - - value: Must be set. If an array, operator will be defaulted to IN.
  *   - - numeric: If true, the value will not be surrounded in quotes.
+ *   - - raw: If you specify raw the value will be used as it is, so you can have field to field conditions.
  *   - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
 class views_join {
@@ -1667,8 +1668,14 @@ class views_join {
           // And now deal with the value and the operator.  Set $q to
           // a single-quote for non-numeric values and the
           // empty-string for numeric values, then wrap all values in $q.
-          $raw_value = $this->db_safe($info['value'], $info);
-          $q = (empty($info['numeric']) ? "'" : '');
+          if (empty($info['raw'])) {
+            $raw_value = $this->db_safe($info['value'], $info);
+            $q = (empty($info['numeric']) ? "'" : '');
+          }
+          else {
+            $raw_value = $info['value'];
+            $q = '';
+          }
 
           if (is_array($raw_value)) {
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';

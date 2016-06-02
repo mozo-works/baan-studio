@@ -49,6 +49,8 @@ function template_preprocess_views_view(&$vars) {
   $vars['display_id'] = $view->current_display;
 
   // Basic classes
+  $vars['css_class'] = '';
+
   $vars['classes_array'] = array();
   $vars['classes_array'][] = 'view';
   $vars['classes_array'][] = 'view-' . views_css_safe($vars['name']);
@@ -66,7 +68,7 @@ function template_preprocess_views_view(&$vars) {
   $vars['header'] = $view->display_handler->render_area('header', $empty);
   $vars['footer'] = $view->display_handler->render_area('footer', $empty);
   if ($empty) {
-    $vars['empty'] = $view->display_handler->render_area('empty');
+    $vars['empty'] = $view->display_handler->render_area('empty', $empty);
   }
 
   $vars['exposed']    = !empty($view->exposed_widgets) ? $view->exposed_widgets : '';
@@ -413,8 +415,6 @@ function template_preprocess_views_view_table(&$vars) {
   }
   $query = empty($query) ? '' : '&' . http_build_query($query, '', '&');
 
-  $header = array();
-
   // Fields must be rendered in order as of Views 2.3, so we will pre-render
   // everything.
   $renders = $handler->render_fields($result);
@@ -587,7 +587,7 @@ function template_preprocess_views_view_grid(&$vars) {
     }
     if ($row) {
       // Fill up the last line only if it's configured, but this is default.
-      if (!empty($handler->options['fill_single_line']) || count($rows)) {
+      if (!empty($handler->options['fill_single_line']) && count($rows)) {
         for ($i = 0; $i < ($columns - $col_count); $i++) {
           $row[] = '';
         }
@@ -736,7 +736,7 @@ function template_preprocess_views_view_rss(&$vars) {
   // The RSS 2.0 "spec" doesn't indicate HTML can be used in the description.
   // We strip all HTML tags, but need to prevent double encoding from properly
   // escaped source data (such as &amp becoming &amp;amp;).
-  $vars['description'] = check_plain(decode_entities(strip_tags($description)));
+  $vars['description'] = check_plain(decode_entities(strip_tags($style->get_description())));
 
   if ($view->display_handler->get_option('sitename_title')) {
     $title = variable_get('site_name', 'Drupal');
@@ -817,7 +817,7 @@ function template_preprocess_views_exposed_form(&$vars) {
     // set up defaults so that there's always something there.
     $widget->label = $widget->operator = $widget->widget = NULL;
 
-    $widget->id = $form[$info['value']]['#id'];
+    $widget->id = isset($form[$info['value']]['#id']) ? $form[$info['value']]['#id'] : '';
     if (!empty($info['label'])) {
       $widget->label = $info['label'];
     }
@@ -833,6 +833,7 @@ function template_preprocess_views_exposed_form(&$vars) {
     $widget = new stdClass;
     // set up defaults so that there's always something there.
     $widget->label = $widget->operator = $widget->widget = NULL;
+    $widget->id = 'checkboxes';
     $widget->widget = $checkboxes;
     $vars['widgets']['checkboxes'] = $widget;
   }

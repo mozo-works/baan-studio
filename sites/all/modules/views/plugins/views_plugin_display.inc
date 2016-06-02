@@ -169,6 +169,21 @@ class views_plugin_display extends views_plugin {
       // Clear the values
       $this->set_option('distinct', NULL);
     }
+
+    // Convert filter groups.
+    $filter_groups = $this->get_option('filter_groups');
+    // Only convert if it wasn't converted yet, which is the case if there is a 0 group.
+    if (isset($filter_groups['groups'][0])) {
+      // Update filter groups.
+      $filter_groups ['groups'] = views_array_key_plus($filter_groups['groups']);
+      $this->set_option('filter_groups', $filter_groups);
+      // Update the filter group on each filter.
+      $filters = $this->get_option('filters');
+      foreach ($filters as &$filter) {
+        $filter['group']++;
+      }
+      $this->set_option('filters', $filters);
+    }
   }
 
   function construct() {
@@ -602,7 +617,7 @@ class views_plugin_display extends views_plugin {
       'filter_groups' => array(
         'contains' => array(
           'operator' => array('default' => 'AND'),
-          'groups' => array('default' => array(0 => 'AND')),
+          'groups' => array('default' => array(1 => 'AND')),
         ),
       ),
       'filters' => array(
@@ -741,7 +756,14 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
-   * Get the display or row plugin, if it exists.
+   * Get the instance of a plugin, for example style or row.
+   *
+   * @param string $type
+   *   The type of the plugin.
+   * @param string $name
+   *   The name of the plugin defined in hook_views_plugins.
+   *
+   * @return views_plugin|FALSE
    */
   function get_plugin($type = 'style', $name = NULL) {
     static $cache = array();
@@ -1003,7 +1025,7 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Change the name of this display.'),
     );
 
-    $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
+    $display_comment = check_plain(drupal_substr($this->get_option('display_comment'), 0, 10));
     $options['display_comment'] = array(
       'category' => 'basic',
       'title' => t('Comment'),
@@ -1345,8 +1367,8 @@ class views_plugin_display extends views_plugin {
         );
         $form['use_more_always'] = array(
           '#type' => 'checkbox',
-          '#title' => t('Do not display more link unless there is more content'),
-          '#description' => t("This will display the more link even if there are no more items to display."),
+          '#title' => t("Display 'more' link only if there is more content"),
+          '#description' => t("Leave this unchecked to display the 'more' link even if there are no more items to display."),
           '#default_value' => !$this->get_option('use_more_always'),
             '#dependency' => array(
               'edit-use-more' => array(TRUE),
@@ -1578,6 +1600,7 @@ class views_plugin_display extends views_plugin {
 
         // Default text.
         // We have some options, so make a list.
+        $output = '';
         if (!empty($options)) {
           $output = t('<p>The following tokens are available for this link.</p>');
           foreach (array_keys($options) as $type) {

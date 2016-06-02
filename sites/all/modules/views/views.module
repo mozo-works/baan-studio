@@ -701,6 +701,8 @@ function &views_get_page_view() {
 /**
  * Set the current 'current view' that is being built/rendered so that it is
  * easy for other modules or items in drupal_eval to identify
+ *
+ * @return view
  */
 function &views_set_current_view($view = NULL) {
   static $cache = NULL;
@@ -715,6 +717,8 @@ function &views_set_current_view($view = NULL) {
  * Find out what, if any, current view is currently in use. Please note that
  * this returns a reference, so be careful! You can unintentionally modify the
  * $view object.
+ *
+ * @return view
  */
 function &views_get_current_view() {
   return views_set_current_view();
@@ -857,6 +861,7 @@ function views_include_default_views($reset = FALSE) {
 function views_get_handler($table, $field, $key, $override = NULL) {
   $data = views_fetch_data($table);
   $handler = NULL;
+  views_include('handlers');
 
   if (isset($data[$field][$key])) {
     // Set up a default handler:
@@ -1743,7 +1748,7 @@ function views_microtime() {
  * @param $alter
  *   - max_length: Maximum lenght of the string, the rest gets truncated.
  *   - word_boundary: Trim only on a word boundary.
- *   - ellipsis: Trim only on a word boundary.
+ *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
  *   - html: Take sure that the html is correct.
  */
 function views_trim_text($alter, $value) {
@@ -1775,4 +1780,20 @@ function views_trim_text($alter, $value) {
   }
 
   return $value;
+}
+
+/**
+ * Adds one to each key of the array.
+ *
+ * For example array(0 => 'foo') would be array(1 => 'foo').
+ */
+function views_array_key_plus($array) {
+  $keys = array_keys($array);
+  rsort($keys);
+  foreach ($keys as $key) {
+    $array[$key + 1] = $array[$key];
+    unset($array[$key]);
+  }
+  asort($array);
+  return $array;
 }

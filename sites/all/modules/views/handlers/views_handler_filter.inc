@@ -60,7 +60,7 @@ class views_handler_filter extends views_handler {
 
     $options['operator'] = array('default' => '=');
     $options['value'] = array('default' => '');
-    $options['group'] = array('default' => '0');
+    $options['group'] = array('default' => '1');
     $options['exposed'] = array('default' => FALSE);
     $options['expose'] = array(
       'contains' => array(
@@ -311,6 +311,12 @@ class views_handler_filter extends views_handler {
         '#default_value' => $this->options['expose']['optional'],
       );
     }
+    else {
+      $form['expose']['optional'] = array(
+        '#type' => 'value',
+        '#value' => FALSE,
+      );
+    }
     if (empty($this->no_single)) {
       $form['expose']['single'] = array(
         '#type' => 'checkbox',
@@ -442,6 +448,10 @@ class views_handler_filter extends views_handler {
       $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? '<Any>' : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
       $form['#default_value'] = 'All';
+
+      if (empty($this->options['expose']['optional'])) {
+        $form['#required'] = TRUE;
+      }
     }
   }
 
@@ -449,7 +459,7 @@ class views_handler_filter extends views_handler {
    * Tell the renderer about our exposed form. This only needs to be
    * overridden for particularly complex forms. And maybe not even then.
    *
-   * @return
+   * @return array|null
    *   An array with the following keys:
    *   - operator: The $form key of the operator. Set to NULL if no operator.
    *   - value: The $form key of the value. Set to NULL if no value.
@@ -580,6 +590,8 @@ class views_handler_filter extends views_handler {
    * with OR groups. Some filters must also use HAVING which also makes
    * them not groupable. These filters will end up in a special group
    * if OR grouping is in use.
+   *
+   * @return bool
    */
    function can_group() {
      return TRUE;
@@ -589,6 +601,8 @@ class views_handler_filter extends views_handler {
 
 /**
  * A special handler to take the place of missing or broken handlers.
+ *
+ * @ingroup views_filter_handlers
  */
 class views_handler_filter_broken extends views_handler_filter {
   function ui_name($short = FALSE) {

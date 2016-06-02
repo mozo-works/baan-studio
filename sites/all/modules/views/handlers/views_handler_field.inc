@@ -852,13 +852,14 @@ If you would like to have the characters %5B and %5D please use the html entity 
    */
   function render_text($alter) {
     $value = $this->last_render;
-    if (!empty($this->options['alter']['trim_whitespace'])) {
-      $value = trim($value);
-    }
 
     if (!empty($alter['alter_text']) && $alter['text'] !== '') {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
+    }
+
+    if (!empty($this->options['alter']['trim_whitespace'])) {
+      $value = trim($value);
     }
 
     // Check whether the value is empty and return nothing, so the field isn't rendered.
@@ -1148,6 +1149,8 @@ If you would like to have the characters %5B and %5D please use the html entity 
 
 /**
  * A special handler to take the place of missing or broken handlers.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_broken extends views_handler_field {
   function ui_name($short = FALSE) {
@@ -1171,6 +1174,8 @@ class views_handler_field_broken extends views_handler_field {
 
 /**
  * Render a numeric value as a size.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_file_size extends views_handler_field {
   function option_definition() {
@@ -1211,7 +1216,9 @@ class views_handler_field_file_size extends views_handler_field {
 }
 
 /**
- * A handler to run a field through simple XSS filtering
+ * A handler to run a field through simple XSS filtering.
+ *
+ * @ingroup views_field_handlers
  */
 class views_handler_field_xss extends views_handler_field {
   function render($values) {
